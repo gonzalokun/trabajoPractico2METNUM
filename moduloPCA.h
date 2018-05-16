@@ -5,6 +5,11 @@
 #ifndef TRABAJOPRACTICO2METNUM_MODULOPCA_H
 #define TRABAJOPRACTICO2METNUM_MODULOPCA_H
 
-//NADA
+class moduloPCA{
+    public:
+        //
+    private:
+        //
+};
 
 #endif //TRABAJOPRACTICO2METNUM_MODULOPCA_H
