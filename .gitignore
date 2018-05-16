@@ -1,0 +1,7 @@
+#Ignoro la carpeta del build y la del clion
+
+**/.idea
+
+**/cmake-build-debug
+
+**/archivos_tp2
