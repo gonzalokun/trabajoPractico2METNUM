@@ -122,16 +122,18 @@ bool LoadPPMFile(uchar** data, int *width, int *height, PPM_LOADER_PIXEL_TYPE* p
 	{
 		return false;
 	}
+
 	// Open file
 	FILE* fid = fopen(filename, "rb");
 	if (!fid) {
 		printf("PPM load error: file access denied %s\n", filename);
 		return false;
 	}
+
 	// Read PPM/PGM header P5/P6
 	int channels = 0;
 	char line[256];
-  char *ptr;
+    char *ptr;
 	fgets(line, 256, fid);
 
 	if ( line[0]=='P' && line[1]=='5' ) {

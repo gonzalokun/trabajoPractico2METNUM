@@ -46,14 +46,14 @@ class cargadorDeImagenes{
 
         //Devuelve el conjunto de las imagenes de la base con el siguiente formato:
         //  <(vector que representa la imagen),(ID de la persona)>
-        std::vector< std::pair<std::vector<int>, int> > conjuntoDeImagenes();
+        std::vector< std::pair<std::vector<unsigned int>, int> > conjuntoDeImagenes();
 
     private:
         //Carga la imagen pasada en el vector
         void cargarImagen(std::string rutaArchivo, int IDPersona);
 
         //Vector con todas las imagenes
-        std::vector< std::pair<std::vector<int>, int> > _imagenes;
+        std::vector< std::pair<std::vector<unsigned int>, int> > _imagenes;
 };
 
 #endif //TRABAJOPRACTICO2METNUM_CARGADORDEIMAGENES_H

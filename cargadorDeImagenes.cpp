@@ -12,11 +12,16 @@
 unsigned int obtenerMediaDePixel(uchar* datos, int i, int j, int alto, int ancho){
     if(i > alto)
         throw std::runtime_error("El direccionamiento vertical no puede ser mayor a la altura.");
+
     if(j > ancho)
         throw std::runtime_error("El direccionamiento horizontal no puede ser mayor al ancho.");
+
     unsigned int red = (unsigned int)(datos[i*ancho*3 + j*3 + 0]);
     unsigned int green = (unsigned int)(datos[i*ancho*3 + j*3 + 1]);
     unsigned int blue = (unsigned int)(datos[i*ancho*3 + j*3 + 2]);
+
+    //std::cout << "COLORES EN RGB: (" << red << ", " << green << ", " << blue << ")" << std::endl;
+    
     return (unsigned int)((red+green+blue) / 3);
 }
 
@@ -26,8 +31,12 @@ void leerImagen(std::string filename, uchar** datos, int* ancho, int* alto){
     *alto = 0;
     PPM_LOADER_PIXEL_TYPE pt = PPM_LOADER_PIXEL_TYPE_INVALID;
 
+    std::cout << "ARCHIVO A CARGAR: " << filename.c_str() << std::endl;
+
     bool ret = LoadPPMFile(datos, ancho, alto, &pt, filename.c_str());
-    if (!ret || ancho == 0|| alto == 0|| pt!=PPM_LOADER_PIXEL_TYPE_RGB_8B){
+
+    if (!ret || ancho == 0|| alto == 0|| pt == PPM_LOADER_PIXEL_TYPE_INVALID){
+        //Predicado anterior: (!ret || ancho == 0|| alto == 0|| pt!=PPM_LOADER_PIXEL_TYPE_RGB_8B)
         throw std::runtime_error("Fallo al leer la imagen.");
     }
 }
@@ -88,15 +97,21 @@ cargadorDeImagenes::cargadorDeImagenes(const char *archivo) {
 void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
     std::cout << "CARGANDO IMAGEN: " << rutaArchivo << "; ID: " << IDPersona  << std::endl;
 
+    //UNA CUENTA SE DEFASA Y CARGA MAL LAS COSAS, POR EJEMPLO SI CARGAS EL MISMO ARCHIVO DOS VECES (PARA VER
+    // SI EL VECTOR ES EL MISMO) ENTOCES EN LA POSICION 3437 HAY US DEFASAJE Y A PARTIR DE AHI SE ANULA EL VECTOR   
+    
     //Uso el ppmloader para cargar el archivo dado
-    uchar *datos;
+    uchar *datos = NULL;
     int ancho = 0, alto = 0;
 
-    rutaArchivo = "../" + rutaArchivo;
+    //rutaArchivo = "../" + rutaArchivo;
 
     leerImagen(rutaArchivo, &datos, &ancho, &alto);
 
-    std::vector<int> vectorPixeles;
+    std::cout << "ANCHO DE LA IMAGEN: " << ancho << std::endl;
+    std::cout << "ALTO DE LA IMAGEN: " << alto << std::endl;
+
+    std::vector<unsigned int> vectorPixeles;
 
     //Obtengo la info de cada pixel
     for(int h = 0; h < alto; ++h){
@@ -105,14 +120,22 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
         }
     }
 
-    std::cout << "MUESTRO EL VECTOR PARA LA PRUEBA CHICA: " << std::endl;
-    std::cout << "[";
+    std::cout << "TAMAÑO DEL VECTOR DE PIXELES: " << vectorPixeles.size() << std::endl;
+
+    std::cout << "CONTENIDO DE PIXELES DEL VECTOR: " << vectorPixeles.size() << std::endl;
 
     for(int i = 0; i < vectorPixeles.size(); i++){
-        std::cout << i << ", ";
+        std::cout << "PIXEL: " << i << ", VALOR: " << vectorPixeles[i] << std::endl;
     }
 
-    std::cout << "]" << std::endl;
+//    std::cout << "MUESTRO EL VECTOR PARA LA PRUEBA CHICA: " << std::endl;
+//    std::cout << "[";
+//
+//    for(int i = 0; i < vectorPixeles.size(); i++){
+//        std::cout << "(" << vectorPixeles[i] << ", PIXEL: " << i << ")" << ((i + 1 == vectorPixeles.size())? (""): (", "));
+//    }
+//
+//    std::cout << "]" << std::endl;
 
     //Ahora el vector esta cargado con los pixeles de la imagen (en escala de grises)
     //entonces lo pongo en el vector de imagenes
@@ -123,8 +146,7 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
 
 }
 
-std::vector< std::pair<std::vector<int>, int> > cargadorDeImagenes::conjuntoDeImagenes() {
+std::vector< std::pair<std::vector<unsigned int>, int> > cargadorDeImagenes::conjuntoDeImagenes() {
     return _imagenes;
 }
-
 
