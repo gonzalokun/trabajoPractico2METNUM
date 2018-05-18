@@ -14,7 +14,7 @@ class moduloPCA{
 
     private:
         std::vector<std::pair<std::vector<unsigned char>, int>> _conjutoImagenes;
-        std::vector< std::pair<std::vector<unsigned char>, double>> autovalores(); //PASARLE LA MATRIZ M
+        std::vector< std::pair<std::vector<unsigned char>, double>> _obtenerAutovalores(); //PASARLE LA MATRIZ M
 };
 
 #endif //TRABAJOPRACTICO2METNUM_MODULOPCA_H
