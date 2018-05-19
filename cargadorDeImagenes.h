@@ -10,7 +10,9 @@ typedef unsigned char uchar;
 
 //REVISAR ESTAS FUNCIONES
 //Copiadas del ppmloader
-unsigned char obtenerPixel(uchar* datos, int i, int j, int alto, int ancho);
+//unsigned char obtenerPixel(uchar* datos, int i, int j, int alto, int ancho);
+
+double obtenerPixel(uchar* datos, int i, int j, int alto, int ancho);
 
 void leerImagen(std::string filename, uchar** datos, int* ancho, int* alto);
 
@@ -21,14 +23,16 @@ class cargadorDeImagenes{
 
         //Devuelve el conjunto de las imagenes de la base con el siguiente formato:
         //  <(vector que representa la imagen),(ID de la persona)>
-        std::vector<std::pair<std::vector<unsigned char>, int>> conjuntoDeImagenes();
+        //std::vector<std::pair<std::vector<unsigned char>, int>> conjuntoDeImagenes();
+        std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes();
 
     private:
         //Carga la imagen pasada en el vector
         void cargarImagen(std::string rutaArchivo, int IDPersona);
 
         //Vector con todas las imagenes
-        std::vector< std::pair<std::vector<unsigned char>, int> > _imagenes;
+        //std::vector< std::pair<std::vector<unsigned char>, int> > _imagenes;
+        std::vector< std::pair<std::vector<double>, int> > _imagenes;
 };
 
 #endif //TRABAJOPRACTICO2METNUM_CARGADORDEIMAGENES_H

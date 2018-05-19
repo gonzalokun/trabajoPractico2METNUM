@@ -9,7 +9,7 @@
 
 //REVISAR ESTAS FUNCIONES
 //Copiadas del ppmloader
-unsigned char obtenerPixel(uchar* datos, int i, int j, int alto, int ancho){
+double obtenerPixel(uchar* datos, int i, int j, int alto, int ancho){
     if(i > alto)
         throw std::runtime_error("LA COORDENADA i (la primera) SUPERA LA ALTURA VALIDA");
 
@@ -24,7 +24,9 @@ unsigned char obtenerPixel(uchar* datos, int i, int j, int alto, int ancho){
 //
 //    return (unsigned int)((red+green+blue) / 3);
 
-    uchar pixel = (datos[i*ancho + j]);
+//    uchar pixel = (datos[i*ancho + j]);
+
+    double pixel = (double) (datos[i*ancho + j]);
 
     return pixel;
 }
@@ -115,7 +117,7 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
     std::cout << "ANCHO DE LA IMAGEN: " << ancho << std::endl;
     std::cout << "ALTO DE LA IMAGEN: " << alto << std::endl;
 
-    std::vector<unsigned char> vectorPixeles(alto*ancho, 0);
+    std::vector<double> vectorPixeles(alto*ancho, 0);
 
 //    int numPixel = 0;
 //    //Obtengo la info de cada pixel
@@ -128,7 +130,8 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
 //    }
 
     for(int p = 0; p < alto*ancho; p++) {
-        vectorPixeles[p] = datos[p];
+        //vectorPixeles[p] = datos[p];
+        vectorPixeles[p] = (double) datos[p];
     }
 
     std::cout << "TAMAÑO DEL VECTOR DE PIXELES: " << vectorPixeles.size() << std::endl;
@@ -157,7 +160,6 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
 
 }
 
-std::vector< std::pair<std::vector<unsigned char>, int> > cargadorDeImagenes::conjuntoDeImagenes() {
+std::vector< std::pair<std::vector<double>, int> > cargadorDeImagenes::conjuntoDeImagenes() {
     return _imagenes;
 }
-
