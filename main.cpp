@@ -12,6 +12,7 @@ int main(int cantidadDeArgumentos, char** argumentos) {
 
     //Probamos el cargador
     cargadorDeImagenes c(argumentos[4]);
+    cargadorDeImagenes testeo("imagenesATestear.in");
 
     //Creo la variable que maneje el PCA
     PCA modPCA;
@@ -20,7 +21,23 @@ int main(int cantidadDeArgumentos, char** argumentos) {
 
     std::vector<std::vector<double>> matrizM = modPCA.obtenerMatrizM(c.conjuntoDeImagenes(), mediaBase);
 
-    std::vector<std::pair<std::vector<double>, double >> autovecYAutoval = modPCA.calcularAutovalYAutoVec(matrizM);
+    int alfa = 10;
+
+    std::vector<std::pair<std::vector<double>, double >> autovecYAutoval = modPCA.calcularAutovalYAutoVec(matrizM, alfa, 0.01);
+
+//    for(int i = 0; i < autovecYAutoval.size(); i++){
+//        std::cout << "Autovalor " << i <<":" << autovecYAutoval[i].second << std::endl;
+//    }
+
+    std::vector<std::vector<double>> autovectores(autovecYAutoval.size());
+
+    for(int i = 0; i < autovecYAutoval.size(); i++){
+        autovectores[i] = autovecYAutoval[i].first;
+    }
+
+    std::vector<double> imagenSinTC = testeo.conjuntoDeImagenes()[0].first;
+
+    std::vector<double> imagenTC = modPCA.transformacionCaracteristica(autovectores, imagenSinTC);
 
     std::cout << "FIN DE PROGRAMA" << std::endl;
 
