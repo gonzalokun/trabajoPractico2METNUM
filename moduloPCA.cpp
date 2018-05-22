@@ -1,12 +1,13 @@
 #include <math.h>
 #include <stdexcept>
+#include <iostream>
 #include "moduloPCA.h"
 
 //PCA::PCA(std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes) {
 //    //
 //}
 
-std::vector<double> PCA::obtenerMedia(std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes) {
+std::vector<double> PCA::obtenerMedia(const std::vector<std::pair<std::vector<double>, int>> &conjuntoDeImagenes) const{
     int cantidadDeVectores = conjuntoDeImagenes.size();
     std::vector<double> promedioVectores(conjuntoDeImagenes[0].first.size(), 0);
 
@@ -22,13 +23,14 @@ std::vector<double> PCA::obtenerMedia(std::vector<std::pair<std::vector<double>,
 }
 
 std::vector<std::vector<double>> PCA::obtenerMatrizM(
-        std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes, std::vector<double> vectorMedia) {
+        const std::vector<std::pair<std::vector<double>, int>> &conjuntoDeImagenes, const std::vector<double> &vectorMedia) {
     unsigned int cantidadDeVectores = conjuntoDeImagenes.size();
 
     //Cant elementos de cada vector
     unsigned int cantidadDeColumnas = conjuntoDeImagenes[0].first.size();
     std::vector<std::vector<double>> matrizX;
 
+    //std::cout << "Antes de crear la matriz X" << std::endl;
     //Lleno la matriz X con los datos que corresponden
     for(int fila = 0; fila < cantidadDeVectores; fila++){
         std::vector<double> filaActual(cantidadDeColumnas, 0);
@@ -40,18 +42,23 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
         matrizX.push_back(filaActual);
     }
 
+    //std::cout << "Despues de crear la matriz X" << std::endl;
+
     //Deberia estar formada la matrizX
 
+    //std::cout << "Antes de crear la matriz X transpuesta" << std::endl;
     //Ahora calculo la transpuesta
     //Si matrizX es cantidadDeVectores * cantidadDeColumnas -> matrizXt es cantidadDeColumnas * cantidadDeVectores
-    std::vector<std::vector<double>> matrizXt(cantidadDeColumnas, std::vector<double>(cantidadDeVectores));
+//    std::vector<std::vector<double>> matrizXt(cantidadDeColumnas, std::vector<double>(cantidadDeVectores));
+    std::vector<std::vector<double>> matrizXt(transponerMatriz(matrizX));
 
-    for(int fila = 0; fila < cantidadDeVectores; fila++){
-        //
-        for(int columna = 0; columna < cantidadDeColumnas; columna++){
-            matrizXt[columna][fila] = matrizX[fila][columna];
-        }
-    }
+    //std::cout << "Despues de crear la matriz X transpuesta" << std::endl;
+//    for(int fila = 0; fila < cantidadDeVectores; fila++){
+//        //
+//        for(int columna = 0; columna < cantidadDeColumnas; columna++){
+//            matrizXt[columna][fila] = matrizX[fila][columna];
+//        }
+//    }
 
     //Ahora puedo calcular la matriz M haciendo Xt*X
     //M va a ser de tamaño cantidadDeColumnas * cantidadDeColumnas
@@ -70,22 +77,20 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     return matrizM;
 }
 
-//std::vector<std::vector<double>> PCA::calcularAutovectores(std::vector<double> autovalores,
-//                                                           std::vector<std::vector<double>> matrizM) {
-//    //
-//}
-
 std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVec(
         std::vector<std::vector<double>> matrizM) {
     //Acá guardo los autovec y los autoval, va a haber n autovec (y autoval)
-    int tamMatriz = matrizM.size();
+    unsigned int tamMatriz = matrizM.size();
 //    std::vector<std::pair<std::vector<double>, double >> paresAutoVecYAutoVal(tamMatriz, std::make_pair(std::vector<double>(tamMatriz), 0));
     std::vector<std::pair<std::vector<double>, double >> paresAutoVecYAutoVal;
     double tolerancia = 0.01;
 
+    std::cout << "TAMAÑO MATRIZ: " << tamMatriz << std::endl;
+
     //Para cada autovalor
     for(int i = 0; i < tamMatriz; i++){
         //Por cada iteracion de este ciclo tengo que hallar un par <autovector, autovalor>
+        std::cout << "CICLO i: " << i << std::endl;
 
         //Hago un vector al azar normalizado (POR AHORA AGARRO EL DE SOLO UNOS)
         std::vector<double> vectorX(tamMatriz, (1.0 / tamMatriz));
@@ -104,6 +109,9 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
 
             //Calculo el Rayleigh Quotient del autovec
             autovalIter = calcularAutovalor(matrizM, vectorIteracion);
+
+            std::cout << "AUTOVALX: " << autovalX  << std::endl;
+            std::cout << "AUTOVALITER: " << autovalIter  << std::endl;
 
             //Si los autovalores calculados estan muy cerca, entonces el vector no cambio mucho y nos estamos
             //acercando al autovalor real
@@ -143,14 +151,18 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
     return paresAutoVecYAutoVal;
 }
 
-std::vector<std::vector<double>> PCA::transponerMatriz(std::vector<std::vector<double>> matriz) {
+std::vector<std::vector<double>> PCA::transponerMatriz(const std::vector<std::vector<double>> &matriz) const{
     //Calculo la transpuesta
+
+    std::cout << "Cantidad de filas de matriz ingresada: " << matriz.size()  << std::endl;
+    std::cout << "Cantidad de columnas de matriz ingresada: " << matriz[0].size()  << std::endl;
+
     //Si matriz es matriz.size * matriz[i].size (para cualquier i) -> matrizT es matriz[i].size * matriz.size
     std::vector<std::vector<double>> matrizT(matriz[0].size(), std::vector<double>(matriz.size()));
 
-    for(int fila = 0; fila < matriz[0].size(); fila++){
+    for(int fila = 0; fila < matriz.size(); fila++){
         //
-        for(int columna = 0; columna < matriz.size(); columna++){
+        for(int columna = 0; columna < matriz[0].size(); columna++){
             matrizT[columna][fila] = matriz[fila][columna];
         }
     }
@@ -159,10 +171,12 @@ std::vector<std::vector<double>> PCA::transponerMatriz(std::vector<std::vector<d
 }
 
 //Hace la multiplicacion A*x donde A es matriz y x vector, el resultado es normalizado
-std::vector<double> PCA::multiplicarMatrizVector(std::vector<std::vector<double>> &matriz, std::vector<double> &vec) const{
+std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<double>> &matriz, const std::vector<double> &vec) const{
     if(matriz[0].size() != vec.size()){
         throw std::runtime_error("EL TAMAÑO DE LA MATRIZ Y EL VECTOR NO COINCIDEN");
     }
+
+    //std::cout << "ANTES DE MULTIPLICAR LA MATRIZ"  << std::endl;
 
     //Se puede multiplicar
     std::vector<double> resultado(vec.size(), 0);
@@ -173,6 +187,8 @@ std::vector<double> PCA::multiplicarMatrizVector(std::vector<std::vector<double>
             suma += pow(matriz[fila][k] * vec[k], 2); //No hace falta el modulo
         }
     }
+
+    //std::cout << "DESPUES DE MULTIPLICAR LA MATRIZ"  << std::endl;
 
     suma = sqrt(suma); //Ahora esto es la norma
 
@@ -186,7 +202,7 @@ std::vector<double> PCA::multiplicarMatrizVector(std::vector<std::vector<double>
 
 //Calcula estimado del autovalor con el Rayleigh Quotient
 //si autovector es autovector de matrizM entonces esta funcion devuelve el autovalor exacto
-double PCA::calcularAutovalor(std::vector<std::vector<double>> matrizM, std::vector<double> autovector) {
+double PCA::calcularAutovalor(const std::vector<std::vector<double>> &matrizM, const std::vector<double> &autovector) const{
     //Tengo que calcular:
     // (matrizM * autovector)^t * autovector
     // autovector^t * autvector
@@ -211,7 +227,15 @@ double PCA::calcularAutovalor(std::vector<std::vector<double>> matrizM, std::vec
     return (Avtv / vtv);
 }
 
-std::vector<double> PCA::transformacionCaracteristica(std::vector<std::vector<double>> autovectores,
-                                                      std::vector<double> imagenVectorizada, int alfa) {
-    //
+std::vector<double> PCA::transformacionCaracteristica(std::vector<std::vector<double>> &autovectores,
+                                                      std::vector<double> &imagenVectorizada, int alfa) {
+    std::vector<double> transformacionCaracteristica(alfa, 0);
+
+    for(int i = 0; i < alfa; i++){
+        for(int k = 0; k < imagenVectorizada.size(); k++){
+            transformacionCaracteristica[i] += autovectores[i][k] * imagenVectorizada[k];
+        }
+    }
+
+    return transformacionCaracteristica;
 }

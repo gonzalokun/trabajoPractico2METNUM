@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "cargadorDeImagenes.h"
+#include "moduloPCA.h"
 
 int main(int cantidadDeArgumentos, char** argumentos) {
 
@@ -12,6 +13,16 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     //Probamos el cargador
     cargadorDeImagenes c(argumentos[4]);
 
+    //Creo la variable que maneje el PCA
+    PCA modPCA;
+
+    std::vector<double> mediaBase = modPCA.obtenerMedia(c.conjuntoDeImagenes());
+
+    std::vector<std::vector<double>> matrizM = modPCA.obtenerMatrizM(c.conjuntoDeImagenes(), mediaBase);
+
+    std::vector<std::pair<std::vector<double>, double >> autovecYAutoval = modPCA.calcularAutovalYAutoVec(matrizM);
+
+    std::cout << "FIN DE PROGRAMA" << std::endl;
 
     //PARTE DONDE PRUEBO COSAS
 
