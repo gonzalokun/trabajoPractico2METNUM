@@ -7,8 +7,10 @@
 #include "knn.hpp"
 #include "moduloPCA.h"
 
-void operacionkNN(std::string trainset, std::string testSet, std::string classif);
-void operacionkNNPCA(std::string trainset, std::string testSet, std::string classif);
+void operacionkNN(std::string trainset, std::string testSet, std::string classif, int valorK);
+void operacionkNNPCA(std::string trainset, std::string testSet, std::string classif, int valorK);
+void pruebaPCA(std::string trainset, std::string testSet, std::string classif);
+void pruebaKFold();
 
 int main(int cantidadDeArgumentos, char** argumentos) {
 
@@ -71,14 +73,22 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     std::cout << "TESTSET: " << testSet << std::endl;
     std::cout << "CLASSIF: " << classif << std::endl;
 
+    int valorK = 7;
+
     //Ahora opero según lo ingresado
     if(metodo == "0"){
         //Solo se hace kNN
-        operacionkNN(trainSet, testSet, classif);
+        operacionkNN(trainSet, testSet, classif, valorK);
     }else if(metodo == "1"){
         //Se hace kNN + PCA
-        operacionkNNPCA(trainSet, testSet, classif);
-    } else{
+        operacionkNNPCA(trainSet, testSet, classif, valorK);
+    }else if(metodo == "2"){
+        //Se hace kNN + PCA
+        pruebaPCA(trainSet, testSet, classif);
+    }else if(metodo == "3"){
+        //Se hace kNN + PCA
+        //pruebaKFold();
+    }else{
         //No se hace nada por ahora
         std::cout << "NO SE HIZO NADA!!!!!" << std::endl;
     }
@@ -151,7 +161,7 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     return 0;
 }
 
-void operacionkNN(std::string trainset, std::string testSet, std::string classif){
+void operacionkNN(std::string trainset, std::string testSet, std::string classif, int valorK){
     std::cout << "ENTRE EN operacionkNN!" << std::endl;
 
     ofstream archivoOUT(classif, std::ofstream::out);
@@ -175,7 +185,7 @@ void operacionkNN(std::string trainset, std::string testSet, std::string classif
     for(int imagen = 0; imagen < baseDePrueba.conjuntoDeImagenes().size(); imagen++){
 
         //Le averiguo el knn a la imagen
-        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], 7);
+        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], valorK);
 
         //std::cout << "SOBREVIVI EL KNN DE LA ITERACION: " << imagen << std::endl;
 
@@ -201,14 +211,132 @@ void operacionkNN(std::string trainset, std::string testSet, std::string classif
     archivoOUT.close();
 }
 
-void operacionkNNPCA(std::string trainset, std::string testSet, std::string classif){
+void operacionkNNPCA(std::string trainset, std::string testSet, std::string classif, int valorK){
     std::cout << "ENTRE EN operacionkNNPCA!" << std::endl;
 
-    //Es igual a la anterior pero le aplico PCA a los vectores antes de usarla
+    int alfa = 15;
+    double tolerancia = 0.01;
+
+    ofstream archivoOUT(classif, std::ofstream::out);
+    std::stringstream conversor;
+    conversor.str("");
+    conversor.clear();
+
     cargadorDeImagenes baseDeEntrenamiento(trainset.c_str());
     cargadorDeImagenes baseDePrueba(testSet.c_str());
 
-    //Acá le aplicas PCA a todo
+    std::vector<std::vector<double>> vecImagenesBase = baseDeEntrenamiento.vectoresDeImagenes();
+    std::vector<int> clases = baseDeEntrenamiento.clases();
 
-    //Acá haces lo de la anterior
+    std::cout << "TAMAÑO DE LA BASE DE ENTRENAMIENTO: " << baseDeEntrenamiento.conjuntoDeImagenes().size() << std::endl;
+    std::cout << "TAMAÑO DE LA BASE A PROBAR: " << baseDePrueba.conjuntoDeImagenes().size() << std::endl;
+
+    //Preproceso con PCA las imagenes de la base
+    PCA modPCA;
+
+    std::vector<double> vectorMedia = modPCA.obtenerMedia(baseDeEntrenamiento.conjuntoDeImagenes());
+    std::vector<std::vector<double>> matrizM = modPCA.obtenerMatrizM(baseDeEntrenamiento.conjuntoDeImagenes(), vectorMedia);
+    std::vector<std::pair<std::vector<double>, double >> autoVecYAutoVal = modPCA.calcularAutovalYAutoVec(matrizM, alfa, tolerancia);
+
+    std::cout << "SOBREVIVI 1" << std::endl;
+
+    std::vector<std::vector<double>> autovectoresBasePrueba(autoVecYAutoVal.size());
+    for(int j = 0; j < autoVecYAutoVal.size(); j++){
+        autovectoresBasePrueba[j] = autoVecYAutoVal[j].first;
+    }
+
+    std::cout << "SOBREVIVI 2" << std::endl;
+
+    //Aplico la transformacion a los vectores
+    for(int i = 0; i < vecImagenesBase.size(); i++){
+        vecImagenesBase[i] = modPCA.transformacionCaracteristica(autovectoresBasePrueba, vecImagenesBase[i]);
+    }
+    //
+
+    std::cout << "SOBREVIVI 3" << std::endl;
+
+    //Preproceso con PCA las imagenes de test
+    vectorMediaTest = modPCA.obtenerMedia(baseDePrueba.conjuntoDeImagenes());
+    matrizMTest = modPCA.obtenerMatrizM(baseDePrueba.conjuntoDeImagenes(), vectorMediaTest);
+    autoVecYAutoValTest = modPCA.calcularAutovalYAutoVec(matrizMTest, alfa, tolerancia);
+
+    std::cout << "SOBREVIVI 4" << std::endl;
+
+    std::vector<std::vector<double>> autovectoresBaseTest(autoVecYAutoVal.size());
+    for(int j = 0; j < autoVecYAutoValTest.size(); j++){
+        autovectoresBaseTest[j] = autoVecYAutoValTest[j].first;
+    }
+
+    std::vector<std::vector<double>> vecImagenesTest = baseDePrueba.vectoresDeImagenes();
+
+    //Aplico la transformacion a los vectores
+    for(int i = 0; i < vecImagenesTest.size(); i++){
+        vecImagenesTest[i] = modPCA.transformacionCaracteristica(autovectoresBaseTest, vecImagenesTest[i]);
+    }
+    //
+
+    //Realizo el reconocimiento mediante kNN
+    //Para cada imagen a reconocer su ID
+    for(int imagen = 0; imagen < baseDePrueba.conjuntoDeImagenes().size(); imagen++){
+
+        //Le averiguo el knn a la imagen
+        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], valorK);
+
+        //Aca puedo chequear el accuracy antes de seguir!
+
+        //Ahora tengo que escribir en el archivo
+
+        std::string lineaSalida;
+
+        conversor << baseDePrueba.rutas()[imagen] + ", ";
+        conversor << IDpropuesta;
+        conversor << ",\n";
+
+        lineaSalida = conversor.str();
+
+        archivoOUT << lineaSalida;
+
+        //Limpio el conversor
+        conversor.str("");
+        conversor.clear();
+    }
+
+    archivoOUT.close();
+}
+
+void pruebaPCA(std::string trainset, std::string testSet, std::string classif){
+
+    //Acá le aplicas PCA a todo
+    PCA modPCA;
+
+    cargadorDeImagenes baseDeEntrenamiento(trainset.c_str());
+
+    std::vector<double> mediaBase = modPCA.obtenerMedia(baseDeEntrenamiento.conjuntoDeImagenes());
+
+    std::vector<std::vector<double>> matrizM = modPCA.obtenerMatrizM(baseDeEntrenamiento.conjuntoDeImagenes(), mediaBase);
+
+    int alfa = 15;
+
+    std::vector<std::pair<std::vector<double>, double >> autovecYAutoval = modPCA.calcularAutovalYAutoVec(matrizM, alfa, 0.01);
+
+    std::vector<std::vector<double>> autovectores(autovecYAutoval.size());
+
+    for(int i = 0; i < autovecYAutoval.size(); i++){
+        autovectores[i] = autovecYAutoval[i].first;
+    }
+
+    std::vector<double> autovalores(autovecYAutoval.size());
+
+    for(int i = 0; i < autovecYAutoval.size(); i++){
+        autovalores[i] = autovecYAutoval[i].second;
+    }
+
+    //Ordeno los autoval acá
+    std::sort(autovalores.rbegin(), autovalores.rend());
+    //
+
+    //muestro las raices
+    for(int i = 0; i < autovecYAutoval.size(); i++){
+        std::cout << "AUTOVALOR " << i << ": " << sqrt(autovalores[i]) << std::endl;
+    }
 }

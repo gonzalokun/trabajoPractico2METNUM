@@ -32,6 +32,7 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     std::vector<std::vector<double>> matrizX;
 
     //std::cout << "Antes de crear la matriz X" << std::endl;
+
     //Lleno la matriz X con los datos que corresponden
     for(int fila = 0; fila < cantidadDeVectores; fila++){
         std::vector<double> filaActual(cantidadDeColumnas, 0);
@@ -78,80 +79,6 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     return matrizM;
 }
 
-/*
-std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVec(
-        std::vector<std::vector<double>> matrizM) {
-    //Acá guardo los autovec y los autoval, va a haber n autovec (y autoval)
-    unsigned int tamMatriz = matrizM.size();
-    //std::vector<std::pair<std::vector<double>, double >> paresAutoVecYAutoVal(tamMatriz, std::make_pair(std::vector<double>(tamMatriz), 0));
-    std::vector<std::pair<std::vector<double>, double >> paresAutoVecYAutoVal;
-    double tolerancia = 0.01;
-
-    std::cout << "TAMAÑO MATRIZ: " << tamMatriz << std::endl;
-
-    //Para cada autovalor
-    for(int i = 0; i < tamMatriz; i++){
-        //Por cada iteracion de este ciclo tengo que hallar un par <autovector, autovalor>
-        std::cout << "CICLO i: " << i << std::endl;
-
-        //Hago un vector al azar normalizado (POR AHORA AGARRO EL DE SOLO UNOS)
-        std::vector<double> vectorX(tamMatriz, (1.0));
-
-        //Vector sobre el cual voy a iterar
-        std::vector<double> vectorIteracion(tamMatriz, 0);
-
-        double autovalX = calcularAutovalor(matrizM, vectorX);
-        double autovalIter;
-        bool encontrado = false;
-
-        //Multiplico a la matriz por derecha por el vector hasta que no cambie mucho (se acerca cada vez mas)
-        do{
-            //Igualo el vectorIteracion al vector resultante de multiplicar la matriz por vectorX
-            vectorIteracion = multiplicarMatrizVector(matrizM, vectorX);
-
-            //Calculo el Rayleigh Quotient del autovec
-            autovalIter = calcularAutovalor(matrizM, vectorIteracion);
-
-            std::cout << "AUTOVALX: " << autovalX  << std::endl;
-            std::cout << "AUTOVALITER: " << autovalIter  << std::endl;
-
-            //Si los autovalores calculados estan muy cerca, entonces el vector no cambio mucho y nos estamos
-            //acercando al autovalor real
-            if(fabs(autovalX - autovalIter) < tolerancia){
-                //Estan cerca
-                encontrado = true;
-            }
-            else{
-                //No estan cerca, actualizo el vector y el autovalor para seguir el ciclo
-                autovalX = autovalIter;
-                vectorX = vectorIteracion;
-            }
-
-        }while(!encontrado);
-
-        //Ahora vectorIteracion y autovalIter son el par autovec, autoval correspondiente
-        //paresAutoVecYAutoVal.push_back(std::make_pair(vectorIteracion, autovalIter));
-        paresAutoVecYAutoVal.emplace_back(vectorIteracion, autovalIter);
-
-        //std::vector<std::vector<double>> matrizResta(vectorIteracion.size(), std::vector<double>(vectorIteracion.size()));
-        //Le saco el autovector y el autovalor a la matriz ingresada
-        //Para eso creo la matriz autovalIter * vectorIteracion^t * vectorIteracion
-        //Puedo restarle los valores a matrizM directamente
-        for(int fila = 0; fila < vectorIteracion.size(); fila++){
-            for(int columna = 0; columna < vectorIteracion.size() ; columna++){
-                //matrizResta[fila][columna] = autovalIter * vectorIteracion[fila] * vectorIteracion[columna];
-                matrizM[fila][columna] -= autovalIter * vectorIteracion[fila] * vectorIteracion[columna];
-            }
-        }
-
-        //Deberia estar modificada la matrizM en los lugares correctos para seguir calculando los autovec y autoval
-    }
-
-    //Se calculó todo (Si dios quiere)
-    return paresAutoVecYAutoVal;
-}
-*/
-
 std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVec(
         const std::vector<std::vector<double>> &matrizM, int alfa, double tolerancia){
     //Solo calculo los necesarios
@@ -179,7 +106,7 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
         while(distanciaVectores >= tolerancia){
             vectorAnterior = vectorX;
 
-            vectorX = multiplicarMatrizVector(matrizM, vectorX);
+            vectorX = multiplicarMatrizVector(matrizAux, vectorX);
 
             double normaVector = 1 / (calcularNorma(vectorX));
 
@@ -200,26 +127,28 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
         double autovalor = calcularAutovalor(matrizM, vectorX);
 
         //Los guardo
-        //autoVecYAutoval.emplace_back(vectorX, autovalor);
         autoVecYAutoval[i].first = vectorX;
         autoVecYAutoval[i].second = autovalor;
 
         //Uso deflacion para poder buscar los proximos autovec y autoval
         //A tengo que hacer matrizAux = matrizAux - autovalor * autovector * autovector^t
 
+        //std::cout << "Iteracion " << i << ": " << std::endl;
+
         //Construyo autovalor autovector * autovector^t
         std::vector<std::vector<double>> matrizResta(vectorX.size(), std::vector<double>(vectorX.size()));
 
         for(int fila = 0; fila < matrizResta.size() ; fila++){
             for(int columna = 0; columna < matrizResta[fila].size(); columna++){
-                matrizResta[fila][columna] = vectorX[fila] * vectorX[columna];
+                matrizResta[fila][columna] = autovalor * vectorX[fila] * vectorX[columna];
+
             }
         }
 
         //Se lo resto a matrizAux
-        for(int fila = 0; fila < matrizResta.size() ; fila++){
-            for(int columna = 0; columna < matrizResta[fila].size(); columna++){
-                matrizAux[fila][columna] -= matrizResta[fila][columna];
+        for(int fila = 0; fila < matrizAux.size() ; fila++){
+            for(int columna = 0; columna < matrizAux[fila].size(); columna++){
+                matrizAux[fila][columna] = matrizAux[fila][columna] - matrizResta[fila][columna];
             }
         }
 
@@ -232,7 +161,7 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
 std::vector<double> PCA::generarVectorAlAzar(int &dimension) {
     std::vector<double> vecAlAzar(dimension, 0);
 
-    //De 0 a 255
+    //De 0 a 255 (no deberia importar mucho este rango)
     for(int i = 0; i < dimension; i++){
         vecAlAzar[i] = rand() % 256;
     }
@@ -334,7 +263,7 @@ double PCA::calcularAutovalor(const std::vector<std::vector<double>> &matrizM, c
     //(matrizM * autovector)^t * autovector
 
     double Avtv = 0;
-    for(int i = 0; i < autovector.size(); i++){
+    for(int i = 0; i < mulAv.size(); i++){
         Avtv += mulAv[i] * autovector[i];
     }
 
