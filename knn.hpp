@@ -3,6 +3,7 @@
 #include <math.h>
 #include <utility>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 
@@ -20,9 +21,10 @@ int knn(vector<vector<double>> &conjunto, vector<int> &clase, vector<double> &im
         for(int j=0;j<conjunto[i].size();j++)
         {
             double aux2=(conjunto[i][j]-imagen[j]);
-            double aux=aux+aux2*aux2;
+            aux=aux+aux2*aux2;
         }
         aux = sqrt(aux);//aca tengo la distancia entre la imagen actual y la imagen i
+
         distancia.push_back(make_pair(aux,i));
      }
 
@@ -43,9 +45,10 @@ int knn(vector<vector<double>> &conjunto, vector<int> &clase, vector<double> &im
     int CanMax=1;
     int mayor=ClCer[0];
     int CanAct=1;
-
+// cout<<ClCer[0]<<endl;
     for(int i = 1; i < k; i++)
     {
+     //   cout<<ClCer[i]<<endl;
         if (ClCer[i]==ClCer[i-1])
         {
             CanAct++;
@@ -54,7 +57,7 @@ int knn(vector<vector<double>> &conjunto, vector<int> &clase, vector<double> &im
             if (CanAct>CanMax)
             {
                 CanMax=CanAct;
-                mayor=ClCer[i];
+                mayor=ClCer[i-1];
             }
             CanAct=1;
         }
@@ -68,4 +71,5 @@ int knn(vector<vector<double>> &conjunto, vector<int> &clase, vector<double> &im
     }
 
     return mayor;
+
 }

@@ -175,7 +175,7 @@ void operacionkNN(std::string trainset, std::string testSet, std::string classif
     for(int imagen = 0; imagen < baseDePrueba.conjuntoDeImagenes().size(); imagen++){
 
         //Le averiguo el knn a la imagen
-        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], 25);
+        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], 7);
 
         //std::cout << "SOBREVIVI EL KNN DE LA ITERACION: " << imagen << std::endl;
 
