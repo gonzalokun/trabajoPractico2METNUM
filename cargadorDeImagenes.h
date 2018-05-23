@@ -25,6 +25,9 @@ class cargadorDeImagenes{
         //  <(vector que representa la imagen),(ID de la persona)>
         //std::vector<std::pair<std::vector<unsigned char>, int>> conjuntoDeImagenes();
         std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes();
+        std::vector<std::vector<double>> vectoresDeImagenes();
+        std::vector<int> clases();
+        std::vector<std::string> rutas();
 
     private:
         //Carga la imagen pasada en el vector
@@ -33,6 +36,7 @@ class cargadorDeImagenes{
         //Vector con todas las imagenes
         //std::vector< std::pair<std::vector<unsigned char>, int> > _imagenes;
         std::vector< std::pair<std::vector<double>, int> > _imagenes;
+        std::vector<std::string> _rutasImagenes;
 };
 
 #endif //TRABAJOPRACTICO2METNUM_CARGADORDEIMAGENES_H

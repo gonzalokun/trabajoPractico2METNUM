@@ -205,13 +205,25 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
         autoVecYAutoval[i].second = autovalor;
 
         //Uso deflacion para poder buscar los proximos autovec y autoval
-        for(int fila = 0; fila < vectorX.size(); fila++){
-            for(int columna = 0; columna < vectorX.size() ; columna++){
-                matrizAux[fila][columna] -= autovalor * vectorX[fila] * vectorX[columna];
+        //A tengo que hacer matrizAux = matrizAux - autovalor * autovector * autovector^t
+
+        //Construyo autovalor autovector * autovector^t
+        std::vector<std::vector<double>> matrizResta(vectorX.size(), std::vector<double>(vectorX.size()));
+
+        for(int fila = 0; fila < matrizResta.size() ; fila++){
+            for(int columna = 0; columna < matrizResta[fila].size(); columna++){
+                matrizResta[fila][columna] = vectorX[fila] * vectorX[columna];
             }
         }
 
-        //Deveria funcionar
+        //Se lo resto a matrizAux
+        for(int fila = 0; fila < matrizResta.size() ; fila++){
+            for(int columna = 0; columna < matrizResta[fila].size(); columna++){
+                matrizAux[fila][columna] -= matrizResta[fila][columna];
+            }
+        }
+
+        //Deberia funcionar
     }
 
     return autoVecYAutoval;
@@ -269,7 +281,6 @@ std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<d
 
     //Se puede multiplicar
     std::vector<double> resultado(vec.size(), 0);
-    double suma = 0; //con esto calculo la norma cuadrada de resultado
 
     //
 //    for(int fila = 0; fila < matriz.size(); fila++){
@@ -289,22 +300,12 @@ std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<d
 
         //std::cout << "El sum es: " << sum  << std::endl;
 
-        suma += pow(sum, 2);
-
         //std::cout << "La suma de los sum al cuadrado es: " << suma << std::endl;
 
         resultado[elem] = sum;
     }
 
     //std::cout << "DESPUES DE MULTIPLICAR LA MATRIZ"  << std::endl;
-
-    suma = sqrt(suma); //Ahora esto es la norma
-
-    //suma = 1;
-
-//    for(int i = 0; i < resultado.size() ; i++){
-//        resultado[i] = resultado[i] / suma;
-//    }
 
     //Normalizo resultado
 //    for(int i = 0; i < resultado.size() ; i++){

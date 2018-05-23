@@ -6,14 +6,14 @@
 
 using namespace std;
 
-//conjunto imagenes, conjunto ID, imagen a comparar, valor k
-string knn(vector<vector<unsigned char>> &conjunto, vector<string> &clase, vector<unsigned char> &imagen, int k)//paso mucho por referencia para no tener que hacer copias de cosas enormes
+int knn(vector<vector<double>> &conjunto, vector<int> &clase, vector<double> &imagen, int k)//paso mucho por referencia para no tener que hacer copias de cosas enormes
 {
     //conjunto es las imagenes del conjunto de teaching
     //clase tiene en el elmento i la clase de la imagen i de teaching
     //imagen es la imagen que paso para determinar su clase
     //k es la cantidad de vecinos cercanos que se ve
-    vector<pair<double, int>> distancia;
+    vector<pair<double,int>> distancia;
+
      for(int i=0;i<conjunto.size();i++)
      {
         double aux=0;
@@ -22,47 +22,50 @@ string knn(vector<vector<unsigned char>> &conjunto, vector<string> &clase, vecto
             double aux2=(conjunto[i][j]-imagen[j]);
             double aux=aux+aux2*aux2;
         }
-        double aux=sqrt(aux);//aca tengo la distancia entre la imagen actual y la imagen i
+        aux = sqrt(aux);//aca tengo la distancia entre la imagen actual y la imagen i
         distancia.push_back(make_pair(aux,i));
      }
 
      //ahora el vector distancia ya tiene las distancias euclideanas. Solo queda ordenar estas distancias y obtener los k mas cercanos
     sort(distancia.begin(), distancia.end());
+
     //ahora que de aca es facil obtener los k mas cercanos con second es clave. la forma mas eficiente de contar apariciones de los elementos del string es hacer un sort primero para hacerlo
     //en k log k
-    vector<string> ClCer;//clase de los cercanos
-    for(int i = 0; i < k; i++)
+    vector<int> ClCer;//clase de los cercanos
+    for(int i=0;i<k;i++)
     {
-        ClCer.push_back(clase[distancia[i].second()]);
+        ClCer.push_back(clase[distancia[i].second]);
     }
     sort(ClCer.begin(), ClCer.end());
 
      //solo resta encontrar el que tiene mayor cantidad de elementos consecutivos
 
-    int CanMax = 1;
-    string mayor = ClCer[0];
-    int CanAct = 1;
+    int CanMax=1;
+    int mayor=ClCer[0];
+    int CanAct=1;
+
     for(int i = 1; i < k; i++)
     {
-        if (ClCer[i].comp(ClCer[i-1]) == 0)
+        if (ClCer[i]==ClCer[i-1])
         {
             CanAct++;
         } else
         {
             if (CanAct>CanMax)
             {
-                CanMax = CanAct;
-                mayor = ClCer[i];
+                CanMax=CanAct;
+                mayor=ClCer[i];
             }
-            CanAct = 1;
+            CanAct=1;
         }
 
     }
+
     if (CanAct>CanMax)
     {
-        CanMax = CanAct;
-        mayor = ClCer[k-1];
+        CanMax=CanAct;
+        mayor=ClCer[k-1];
     }
-    return mayor;
 
+    return mayor;
 }

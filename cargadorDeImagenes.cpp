@@ -37,7 +37,7 @@ void leerImagen(std::string filename, uchar** datos, int* ancho, int* alto){
     *alto = 0;
     PPM_LOADER_PIXEL_TYPE pt = PPM_LOADER_PIXEL_TYPE_INVALID;
 
-    std::cout << "ARCHIVO A CARGAR: " << filename.c_str() << std::endl;
+    //std::cout << "ARCHIVO A CARGAR: " << filename.c_str() << std::endl;
 
     bool ret = LoadPPMFile(datos, ancho, alto, &pt, filename.c_str());
 
@@ -67,7 +67,7 @@ cargadorDeImagenes::cargadorDeImagenes(const char *archivo) {
     std::string delimiter = ",";
 
     for(std::string linea; std::getline(listaDeNombres, linea); ){
-        std::cout << linea << std::endl;
+        //std::cout << linea << std::endl;
 
         //Vacio el conversor
         conversor.clear();
@@ -94,14 +94,15 @@ cargadorDeImagenes::cargadorDeImagenes(const char *archivo) {
         //std::cout << "ID DE PERSONA: " << IDPersona << std::endl;
 
         //Cargo la Imagen
-        cargarImagen(nombreArchivoDeImagen.c_str(), IDPersona);
+        cargarImagen(nombreArchivoDeImagen, IDPersona);
+        _rutasImagenes.push_back(nombreArchivoDeImagen);
     }
 
     listaDeNombres.close();
 }
 
 void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
-    std::cout << "CARGANDO IMAGEN: " << rutaArchivo << "; ID: " << IDPersona  << std::endl;
+    //std::cout << "CARGANDO IMAGEN: " << rutaArchivo << "; ID: " << IDPersona  << std::endl;
 
     //UNA CUENTA SE DEFASA Y CARGA MAL LAS COSAS, POR EJEMPLO SI CARGAS EL MISMO ARCHIVO DOS VECES (PARA VER
     // SI EL VECTOR ES EL MISMO) ENTOCES EN LA POSICION 3437 HAY US DEFASAJE Y A PARTIR DE AHI SE ANULA EL VECTOR   
@@ -114,8 +115,8 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
 
     leerImagen(rutaArchivo, &datos, &ancho, &alto);
 
-    std::cout << "ANCHO DE LA IMAGEN: " << ancho << std::endl;
-    std::cout << "ALTO DE LA IMAGEN: " << alto << std::endl;
+    //std::cout << "ANCHO DE LA IMAGEN: " << ancho << std::endl;
+    //std::cout << "ALTO DE LA IMAGEN: " << alto << std::endl;
 
     std::vector<double> vectorPixeles(alto*ancho, 0);
 
@@ -134,7 +135,7 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
         vectorPixeles[p] = (double) datos[p];
     }
 
-    std::cout << "TAMAÑO DEL VECTOR DE PIXELES: " << vectorPixeles.size() << std::endl;
+    //std::cout << "TAMAÑO DEL VECTOR DE PIXELES: " << vectorPixeles.size() << std::endl;
 
 //    std::cout << "CONTENIDO DE PIXELES DEL VECTOR: " << vectorPixeles.size() << std::endl;
 //
@@ -162,4 +163,30 @@ void cargadorDeImagenes::cargarImagen(std::string rutaArchivo, int IDPersona) {
 
 std::vector< std::pair<std::vector<double>, int> > cargadorDeImagenes::conjuntoDeImagenes() {
     return _imagenes;
+}
+
+std::vector<int> cargadorDeImagenes::clases() {
+    std::vector<int> _clases(_imagenes.size());
+
+    //Consiguo el arreglo de clases
+    for(int i = 0; i < _clases.size(); i++){
+        _clases[i] = _imagenes[i].second;
+    }
+
+    return _clases;
+}
+
+std::vector<std::vector<double>> cargadorDeImagenes::vectoresDeImagenes() {
+    std::vector<std::vector<double>> _vectores(_imagenes.size());
+
+    //Consiguo el arreglo de clases
+    for(int i = 0; i < _vectores.size(); i++){
+        _vectores[i] = _imagenes[i].first;
+    }
+
+    return _vectores;
+}
+
+std::vector<std::string> cargadorDeImagenes::rutas() {
+    return _rutasImagenes;
 }
