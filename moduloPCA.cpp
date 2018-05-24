@@ -80,15 +80,19 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
 }
 
 std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVec(
-        const std::vector<std::vector<double>> &matrizM, int alfa, double tolerancia){
+        const std::vector<std::vector<double>> &matrizM, int alfa, double tolerancia, int limiteCiclos){
     //Solo calculo los necesarios
     std::vector<std::pair<std::vector<double>, double >> autoVecYAutoval(alfa);
 
     //Copio la matriz pasada para poder aplicar el metodo de las potencias
     std::vector<std::vector<double>> matrizAux(matrizM);
 
+    std::cout << "TAM DE LA MATRIZ: " << matrizM.size() << "x" << matrizM[0].size()  << std::endl;
+
     //Para cada autovalor
     for(int i = 0; i < alfa; i++){
+
+        std::cout << "Iteracion i: " << i << std::endl;
 
         //Guardo la cantidad de filas
         int filas = matrizM.size();
@@ -102,9 +106,10 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
         //La distancia inicial de los dos vectores
         double distanciaVectores = tolerancia;
 
+        int ciclosRealizados = 0;
+
         //Cuando se acerquen los vectores se habra llegado al autovector
-        while(distanciaVectores >= tolerancia){
-            vectorAnterior = vectorX;
+        while(distanciaVectores >= tolerancia && ciclosRealizados < limiteCiclos){
 
             vectorX = multiplicarMatrizVector(matrizAux, vectorX);
 
@@ -121,6 +126,12 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
             }
 
             distanciaVectores = calcularNorma(resta);
+
+            std::cout << "DISTANCIAVECTORES: " << distanciaVectores  << std::endl;
+
+            vectorAnterior = vectorX;
+
+            ciclosRealizados++;
         }
 
         //Tengo el autovector, ahora calculo el autovalor
@@ -184,8 +195,8 @@ double PCA::calcularNorma(std::vector<double> vector) {
 std::vector<std::vector<double>> PCA::transponerMatriz(const std::vector<std::vector<double>> &matriz) const{
     //Calculo la transpuesta
 
-    std::cout << "Cantidad de filas de matriz ingresada: " << matriz.size()  << std::endl;
-    std::cout << "Cantidad de columnas de matriz ingresada: " << matriz[0].size()  << std::endl;
+    //std::cout << "Cantidad de filas de matriz ingresada: " << matriz.size()  << std::endl;
+    //std::cout << "Cantidad de columnas de matriz ingresada: " << matriz[0].size()  << std::endl;
 
     //Si matriz es matriz.size * matriz[i].size (para cualquier i) -> matrizT es matriz[i].size * matriz.size
     std::vector<std::vector<double>> matrizT(matriz[0].size(), std::vector<double>(matriz.size()));
