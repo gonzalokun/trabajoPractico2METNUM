@@ -69,12 +69,12 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
     //Copio la matriz pasada para poder aplicar el metodo de las potencias
     std::vector<std::vector<double>> matrizAux(matrizM);
 
-    std::cout << "TAM DE LA MATRIZ: " << matrizM.size() << "x" << matrizM[0].size()  << std::endl;
+    //std::cout << "TAM DE LA MATRIZ: " << matrizM.size() << "x" << matrizM[0].size()  << std::endl;
 
     //Para cada autovalor
     for(int i = 0; i < alfa; i++){
 
-        std::cout << "Iteracion i: " << i << std::endl;
+        //std::cout << "Iteracion i: " << i << std::endl;
 
         //Guardo la cantidad de filas
         int filas = matrizM.size();
@@ -109,7 +109,7 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
 
             distanciaVectores = calcularNorma(resta);
 
-            std::cout << "DISTANCIAVECTORES: " << distanciaVectores  << std::endl;
+            //std::cout << "DISTANCIAVECTORES: " << distanciaVectores  << std::endl;
 
             vectorAnterior = vectorX;
 

@@ -11,33 +11,31 @@ using namespace std;
 template<class In>
 class Kfold {
 public:
-    Kfold(int k, In _beg, In _end);
+    Kfold(int k, In _vecto);
     template<class Out>
     void getFold(int foldNo, Out training, Out testing);
 
 private:
-    In beg;
-    In end;
+    In vecto;
     int folds;
     vector<int> whichFoldToGo;
 
 };
 
 template<class In>
-Kfold<In>::Kfold(int _folds, In _beg, In _end) :
-        beg(_beg), end(_end), folds(_folds) {
+Kfold<In>::Kfold(int _folds, In _vecto) :
+        vecto(_vecto), folds(_folds) {
     if (folds <= 0)
     {
         cout<<"No se pueden crear "<< folds<<" folds";
         throw;
     }
 
-    cout << "SOBREVIVI 1" << endl;
 
     int foldNo = 0;
     int cont = 0;
-    for (In i = beg; i != end; i++) {
-        cout << "CICLO i: " << cont << endl;
+    for (auto i = vecto.begin(); i != vecto.end(); i++) {
+        //if (end-i>=0)cout << "CICLO i: " << end-i << endl;
 
         whichFoldToGo.push_back(++foldNo);
 
@@ -47,7 +45,6 @@ Kfold<In>::Kfold(int _folds, In _beg, In _end) :
         cont++;
     }
 
-    cout << "SOBREVIVI 2" << endl;
 
     if (foldNo)
     {
@@ -55,7 +52,6 @@ Kfold<In>::Kfold(int _folds, In _beg, In _end) :
          throw;
     }
 
-    cout << "SOBREVIVI" << endl;
 
     random_shuffle(whichFoldToGo.begin(), whichFoldToGo.end());
 }
@@ -65,8 +61,8 @@ template<class Out>
 void Kfold<In>::getFold(int foldNo, Out training, Out testing) {
 
     int k = 0;
-    In i = beg;
-    while (i != end) {
+    auto i = vecto.begin();
+    while (i != vecto.end()) {
         if (whichFoldToGo[k++] == foldNo) {
             *testing++ = *i++;
         } else
