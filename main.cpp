@@ -268,11 +268,11 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
         autovectoresBaseTest[j] = autoVecYAutoValTest[j].first;
     }
 
-    std::vector<std::vector<double>> vecImagenesTest = baseDePrueba.vectoresDeImagenes();
+    std::vector<std::vector<double>> vecImagenesTest(baseDePrueba.conjuntoDeImagenes().size());
 
     //Aplico la transformacion a los vectores
     for(int i = 0; i < vecImagenesTest.size(); i++){
-        vecImagenesTest[i] = modPCA.transformacionCaracteristica(autovectoresBaseTest, vecImagenesTest[i]);
+        vecImagenesTest[i] = modPCA.transformacionCaracteristica(autovectoresBaseTest, baseDePrueba.vectoresDeImagenes()[i]);
     }
     //
 
@@ -281,7 +281,7 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
     for(int imagen = 0; imagen < baseDePrueba.conjuntoDeImagenes().size(); imagen++){
 
         //Le averiguo el knn a la imagen
-        int IDpropuesta = knn(vecImagenesBase, clases, baseDePrueba.vectoresDeImagenes()[imagen], valorK);
+        int IDpropuesta = knn(vecImagenesBase, clases, vecImagenesTest[imagen], valorK);
 
         //Aca puedo chequear el accuracy antes de seguir!
 
