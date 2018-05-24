@@ -32,17 +32,31 @@ Kfold<In>::Kfold(int _folds, In _beg, In _end) :
         throw;
     }
 
+    cout << "SOBREVIVI 1" << endl;
+
     int foldNo = 0;
+    int cont = 0;
     for (In i = beg; i != end; i++) {
+        cout << "CICLO i: " << cont << endl;
+
         whichFoldToGo.push_back(++foldNo);
+
         if (foldNo == folds)
             foldNo = 0;
+
+        cont++;
     }
+
+    cout << "SOBREVIVI 2" << endl;
+
     if (foldNo)
     {
          cout<<"Con este numero de folds (folds="<< folds <<") no se puede dividir en parter iguales"<<endl;
          throw;
     }
+
+    cout << "SOBREVIVI" << endl;
+
     random_shuffle(whichFoldToGo.begin(), whichFoldToGo.end());
 }
 

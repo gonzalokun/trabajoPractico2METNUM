@@ -7,18 +7,6 @@
 
 #include <vector>
 
-//class moduloPCA{
-//    public:
-//        moduloPCA(std::vector<std::pair<std::vector<unsigned char>, int>> conjuntoDeImagenes);
-//        //
-//
-//    private:
-//        std::vector<std::pair<std::vector<double>, int>> _conjutoImagenes;
-//        std::vector<std::vector<double >> _matriz
-//        std::vector< std::pair<std::vector<double>, double>> _obtenerAutovalores(); //PASARLE LA MATRIZ M
-//};
-
-//namespace PCA{
 class PCA{
 public:
     //template <class T>
@@ -50,8 +38,6 @@ private:
     //Calcula los autovalores de una matriz con el metodo de la potencia
     double calcularAutovalor(const std::vector<std::vector<double>> &matrizM, const std::vector<double> &autovector) const;
 
-    //Calcula los autovectores de una matriz en base a sus autovalores
-    //std::vector<std::vector<double>> calcularAutovectores(std::vector<double> autovalores, std::vector<std::vector<double>> matrizM);
 };
 
 #endif //TRABAJOPRACTICO2METNUM_MODULOPCA_H

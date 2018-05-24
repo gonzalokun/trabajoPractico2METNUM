@@ -4,10 +4,6 @@
 #include <iostream>
 #include "moduloPCA.h"
 
-//PCA::PCA(std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes) {
-//    //
-//}
-
 std::vector<double> PCA::obtenerMedia(const std::vector<std::pair<std::vector<double>, int>> &conjuntoDeImagenes) const{
     int cantidadDeVectores = conjuntoDeImagenes.size();
     std::vector<double> promedioVectores(conjuntoDeImagenes[0].first.size(), 0);
@@ -31,8 +27,6 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     unsigned int cantidadDeColumnas = conjuntoDeImagenes[0].first.size();
     std::vector<std::vector<double>> matrizX;
 
-    //std::cout << "Antes de crear la matriz X" << std::endl;
-
     //Lleno la matriz X con los datos que corresponden
     for(int fila = 0; fila < cantidadDeVectores; fila++){
         std::vector<double> filaActual(cantidadDeColumnas, 0);
@@ -44,23 +38,11 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
         matrizX.push_back(filaActual);
     }
 
-    //std::cout << "Despues de crear la matriz X" << std::endl;
-
     //Deberia estar formada la matrizX
 
-    //std::cout << "Antes de crear la matriz X transpuesta" << std::endl;
     //Ahora calculo la transpuesta
     //Si matrizX es cantidadDeVectores * cantidadDeColumnas -> matrizXt es cantidadDeColumnas * cantidadDeVectores
-    //std::vector<std::vector<double>> matrizXt(cantidadDeColumnas, std::vector<double>(cantidadDeVectores));
     std::vector<std::vector<double>> matrizXt(transponerMatriz(matrizX));
-
-    //std::cout << "Despues de crear la matriz X transpuesta" << std::endl;
-//    for(int fila = 0; fila < cantidadDeVectores; fila++){
-//        //
-//        for(int columna = 0; columna < cantidadDeColumnas; columna++){
-//            matrizXt[columna][fila] = matrizX[fila][columna];
-//        }
-//    }
 
     //Ahora puedo calcular la matriz M haciendo Xt * X
     //M va a ser de tamaño cantidadDeColumnas * cantidadDeColumnas
@@ -144,8 +126,6 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
         //Uso deflacion para poder buscar los proximos autovec y autoval
         //A tengo que hacer matrizAux = matrizAux - autovalor * autovector * autovector^t
 
-        //std::cout << "Iteracion " << i << ": " << std::endl;
-
         //Construyo autovalor autovector * autovector^t
         std::vector<std::vector<double>> matrizResta(vectorX.size(), std::vector<double>(vectorX.size()));
 
@@ -195,9 +175,6 @@ double PCA::calcularNorma(std::vector<double> vector) {
 std::vector<std::vector<double>> PCA::transponerMatriz(const std::vector<std::vector<double>> &matriz) const{
     //Calculo la transpuesta
 
-    //std::cout << "Cantidad de filas de matriz ingresada: " << matriz.size()  << std::endl;
-    //std::cout << "Cantidad de columnas de matriz ingresada: " << matriz[0].size()  << std::endl;
-
     //Si matriz es matriz.size * matriz[i].size (para cualquier i) -> matrizT es matriz[i].size * matriz.size
     std::vector<std::vector<double>> matrizT(matriz[0].size(), std::vector<double>(matriz.size()));
 
@@ -217,18 +194,8 @@ std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<d
         throw std::runtime_error("EL TAMAÑO DE LA MATRIZ Y EL VECTOR NO COINCIDEN");
     }
 
-    //std::cout << "ANTES DE MULTIPLICAR LA MATRIZ"  << std::endl;
-
     //Se puede multiplicar
     std::vector<double> resultado(vec.size(), 0);
-
-    //
-//    for(int fila = 0; fila < matriz.size(); fila++){
-//        for(int k = 0; k < vec.size(); k++){
-//            resultado[k] += matriz[fila][k] * vec[k];
-//            suma += pow(matriz[fila][k] * vec[k], 2); //No hace falta el modulo
-//        }
-//    }
 
     for(int elem = 0; elem < resultado.size(); elem++){
 
@@ -238,19 +205,8 @@ std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<d
             sum += matriz[elem][k] * vec[k];
         }
 
-        //std::cout << "El sum es: " << sum  << std::endl;
-
-        //std::cout << "La suma de los sum al cuadrado es: " << suma << std::endl;
-
         resultado[elem] = sum;
     }
-
-    //std::cout << "DESPUES DE MULTIPLICAR LA MATRIZ"  << std::endl;
-
-    //Normalizo resultado
-//    for(int i = 0; i < resultado.size() ; i++){
-//        resultado[i] = resultado[i] / suma;
-//    }
 
     return resultado;
 }
