@@ -256,13 +256,14 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
     std::cout << "SOBREVIVI 3" << std::endl;
 
     //Preproceso con PCA las imagenes de test
-    vectorMediaTest = modPCA.obtenerMedia(baseDePrueba.conjuntoDeImagenes());
-    matrizMTest = modPCA.obtenerMatrizM(baseDePrueba.conjuntoDeImagenes(), vectorMediaTest);
-    autoVecYAutoValTest = modPCA.calcularAutovalYAutoVec(matrizMTest, alfa, tolerancia);
+    std::vector<double> vectorMediaTest = modPCA.obtenerMedia(baseDePrueba.conjuntoDeImagenes());
+    std::vector<std::vector<double>> matrizMTest = modPCA.obtenerMatrizM(baseDePrueba.conjuntoDeImagenes(), vectorMediaTest);
+    std::vector<std::pair<std::vector<double>, double >> autoVecYAutoValTest = modPCA.calcularAutovalYAutoVec(matrizMTest, alfa, tolerancia);
 
     std::cout << "SOBREVIVI 4" << std::endl;
 
     std::vector<std::vector<double>> autovectoresBaseTest(autoVecYAutoVal.size());
+
     for(int j = 0; j < autoVecYAutoValTest.size(); j++){
         autovectoresBaseTest[j] = autoVecYAutoValTest[j].first;
     }
