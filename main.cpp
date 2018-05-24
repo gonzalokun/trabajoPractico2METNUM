@@ -11,9 +11,8 @@
 void operacionkNN(std::string trainset, std::string testSet, std::string classif, int valorK);
 void operacionkNNPCA(std::string trainset, std::string testSet, std::string classif, int valorAlfa, double valorTolerancia, int valorK, int limiteDeCiclos);
 
-//Iguales que las de arriba pero devuelven el accuracy
+//Hacen el mismo proceso que las de arriba pero devuelven el accuracy, son usadas para el KFold
 double operacionkNN2(std::vector< std::pair<std::vector<double>, int>> trainset, std::vector< std::pair<std::vector<double>, int> > testSet, int valorK);
-
 double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trainset, std::vector< std::pair<std::vector<double>, int> > testSet, int valorAlfa, double valorTolerancia, int valorK, int limiteDeCiclos);
 
 void pruebaPCA(std::string trainset, std::string testSet, std::string classif, int valorAlfa, double valorTolerancia, int limiteDeCiclos);
@@ -22,11 +21,6 @@ void pruebaKFold(std::string trainset, int KDeFold, int valorK, int valorAlfa, d
 int main(int cantidadDeArgumentos, char** argumentos) {
 
     //argumentos: ./tp2 -m <METHOD> -i <TRAINSET> -q <TESTSET> -o <CLASSIF>
-    //Hacer un ciclodespues
-
-    //std::cout << argumentos[4] << std::endl;
-
-    //********************************************//
 
     std::cout << "ARGUMENTOS: " << " ";
 
@@ -35,8 +29,6 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     }
 
     std::cout << std::endl;
-
-    //std::cout << "CANTIDAD DE ARGUMENTOS: " << cantidadDeArgumentos <<std::endl;
 
     std::string metodo;
     std::string trainSet;
@@ -52,12 +44,7 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     //ya que el primer arg es el nombre del archivo
     for(int i = 1; i < cantidadDeArgumentos; i = i+2){
 
-        //std::cout << "VALOR DE i: " << i << std::endl;
-        //std::cout << "ARGUMENTO[i]: " << argumentos[i] << std::endl;
-
-
         if((i + 1 < cantidadDeArgumentos)){
-            //std::cout << "ARGUMENTO[i + 1]: " << argumentos[i + 1] << std::endl;
 
             if(strcmp(argumentos[i], "-m") == 0){
                 metodo = argumentos[i+1];
@@ -74,35 +61,45 @@ int main(int cantidadDeArgumentos, char** argumentos) {
         }
     }
 
-    //Muestro los strings para comprobar
-    //std::cout << "METODO: " << metodo << std::endl;
-    //std::cout << "TRAINSET: " << trainSet << std::endl;
-    //std::cout << "TESTSET: " << testSet << std::endl;
-    //std::cout << "CLASSIF: " << classif << std::endl;
+    //Modificar estos valores para poder ver otros resultados
 
+    //k de kNN
     int valorK = 7;
+
+    //alfa de la transformacion caracteristica (Solo se usa en kNNyPCA)
     int valorAlfa = 15;
+
+    //Distancia minima que tienen que tener los autovalores calculados en PCA
+    //con valores mas chicos se obtienen autovectores y autovalores mas precisos pero se tarda más
     double tolerancia = 0.01;
-    int valorKFold = 41;
+
+    //Limite de ciclos usados para calcular autovectores y autovalores
     int limiteDeCiclos = 100;
-    int modo = 0;
+
+    //K del Kfold
+    int valorKFold = 41;
+
+    //Modos para probar KFold (0 = KFold usando solo kNN, 1 = KFold usando kNN y PCA)
+    int modo = 1;
 
     //Ahora opero según lo ingresado
     if(metodo == "0"){
         //Solo se hace kNN
         operacionkNN(trainSet, testSet, classif, valorK);
+
     }else if(metodo == "1"){
         //Se hace kNN + PCA
         operacionkNNPCA(trainSet, testSet, classif, valorAlfa, tolerancia, valorK, limiteDeCiclos);
+
     }else if(metodo == "2"){
         //Se hace kNN + PCA
-        //pruebaPCA(trainSet, testSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
+        pruebaPCA(trainSet, testSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
 
-        //Para probar al reves
-        pruebaPCA(testSet, trainSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
+        //Para probar el testSet
+        //pruebaPCA(testSet, trainSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
+
     }else if(metodo == "3"){
         //Se hace kNN + PCA
-        //void pruebaKFold(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos, int modo);
         pruebaKFold(trainSet, valorKFold, valorK, valorAlfa, tolerancia, limiteDeCiclos, modo);
     }else{
         //No se hace nada por ahora
@@ -117,7 +114,6 @@ int main(int cantidadDeArgumentos, char** argumentos) {
 }
 
 void operacionkNN(std::string trainset, std::string testSet, std::string classif, int valorK){
-    //std::cout << "ENTRE EN operacionkNN!" << std::endl;
 
     ofstream archivoOUT(classif, std::ofstream::out);
     std::stringstream conversor;
@@ -215,7 +211,6 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
     for(int i = 0; i < vecImagenesBase.size(); i++){
         vecImagenesBase[i] = modPCA.transformacionCaracteristica(autovectoresBasePrueba, vecImagenesBase[i]);
     }
-    //
 
     //Preproceso con PCA las imagenes de test
     std::vector<std::vector<double>> vecImagenesTest(baseDePrueba.conjuntoDeImagenes().size());
@@ -224,7 +219,6 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
     for(int i = 0; i < vecImagenesTest.size(); i++){
         vecImagenesTest[i] = modPCA.transformacionCaracteristica(autovectoresBasePrueba, baseDePrueba.vectoresDeImagenes()[i]);
     }
-    //
 
     int imagenesAcertadas = 0;
     std::vector<int> IDrealesDeBaseDePrueba = baseDePrueba.clases();
@@ -238,7 +232,6 @@ void operacionkNNPCA(std::string trainset, std::string testSet, std::string clas
 
         if(IDpropuesta == IDrealesDeBaseDePrueba[imagen]){
             //La imagen se encontro bien!
-            //cout<<"nunca cree encontrar bien"<<endl;
             imagenesAcertadas++;
         }
 
@@ -304,9 +297,8 @@ void pruebaPCA(std::string trainset, std::string testSet, std::string classif, i
         autovalores[i] = autovecYAutoval[i].second;
     }
 
-    //Ordeno los autoval acá
+    //Ordeno los autoval acá de mayor a menor
     std::sort(autovalores.rbegin(), autovalores.rend());
-    //
 
     //muestro las raices
     for(int i = 0; i < autovecYAutoval.size(); i++){
@@ -351,7 +343,6 @@ double operacionkNN2(std::vector< std::pair<std::vector<double>, int>> trainset,
     return accuracy;
 }
 
-//double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trainset, std::vector< std::pair<std::vector<double>, int> > testSet, int valorAlfa, double valorTolerancia, int valorK, int limiteDeCiclos);
 double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trainset, std::vector< std::pair<std::vector<double>, int> > testSet, int valorAlfa, double valorTolerancia, int valorK, int limiteDeCiclos){
     int alfa = valorAlfa;
     double tolerancia = valorTolerancia;
@@ -379,7 +370,6 @@ double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trains
     for(int i = 0; i < vecImagenesBase.size(); i++){
         vecImagenesBase[i] = modPCA.transformacionCaracteristica(autovectoresBasePrueba, trainset[i].first);
     }
-    //
 
     //Preproceso con PCA las imagenes de test
     std::vector<std::vector<double>> vecImagenesTest(testSet.size());
@@ -388,7 +378,6 @@ double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trains
     for(int i = 0; i < vecImagenesTest.size(); i++){
         vecImagenesTest[i] = modPCA.transformacionCaracteristica(autovectoresBasePrueba, testSet[i].first);
     }
-    //
 
     int imagenesAcertadas = 0;
 
@@ -414,7 +403,6 @@ double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trains
 
 void pruebaKFold(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos, int modo){
     //Pruebo el trainset con KFold
-
     cargadorDeImagenes baseDeEntrenamiento(trainset.c_str());
 
     std::cout << "TAM CONJUNTO: " << baseDeEntrenamiento.conjuntoDeImagenes().size() << std::endl;
