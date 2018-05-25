@@ -16,9 +16,7 @@ double operacionkNN2(std::vector< std::pair<std::vector<double>, int>> trainset,
 double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trainset, std::vector< std::pair<std::vector<double>, int> > testSet, int valorAlfa, double valorTolerancia, int valorK, int limiteDeCiclos);
 
 void pruebaPCA(std::string trainset, std::string testSet, std::string classif, int valorAlfa, double valorTolerancia, int limiteDeCiclos);
-
-void pruebaKFoldkNN(std::string trainset, int KDeFold, int valorK);
-void pruebaKFoldkNNPCA(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos);
+void pruebaKFold(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos, int modo);
 
 int main(int cantidadDeArgumentos, char** argumentos) {
 
@@ -38,7 +36,6 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     std::string classif;
 
     if(cantidadDeArgumentos < 9){
-        std::cout << "Formato de entrada: -m metodoAEjecutar -i setDeTraining -q setDeTest -o nombreArchivoDeSalida" << std::endl;
         return 1;
     }
 
@@ -67,20 +64,20 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     //Modificar estos valores para poder ver otros resultados
 
     //k de kNN
-    int valorK = 7;
+    int valorK = 4;
 
     //alfa de la transformacion caracteristica (Solo se usa en kNNyPCA)
-    int valorAlfa = 15;
+    int valorAlfa = 30;
 
     //Distancia minima que tienen que tener los autovalores calculados en PCA
     //con valores mas chicos se obtienen autovectores y autovalores mas precisos pero se tarda más
-    double tolerancia = 0.01;
+    double tolerancia = 0.0001;
 
     //Limite de ciclos usados para calcular autovectores y autovalores
-    int limiteDeCiclos = 100;
+    int limiteDeCiclos = 1000000;
 
     //K del Kfold
-    int valorKFold = 41;
+    int valorKFold = 5;
 
     //Ahora opero según lo ingresado
     if(metodo == "0"){
@@ -95,15 +92,15 @@ int main(int cantidadDeArgumentos, char** argumentos) {
         //Se hace kNN + PCA
         pruebaPCA(trainSet, testSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
 
+        //Para probar el testSet
+        //pruebaPCA(testSet, trainSet, classif, valorAlfa, tolerancia, limiteDeCiclos);
+
     }else if(metodo == "3"){
         //Se hace kNN + PCA
-        pruebaKFoldkNN(trainSet, valorKFold, valorK);
-
-    }else if(metodo == "4"){
-        //Se hace kNN + PCA
-        pruebaKFoldkNNPCA(trainSet, valorKFold, valorK, valorAlfa, tolerancia, limiteDeCiclos);
-    }
-    else{
+        pruebaKFold(trainSet, valorKFold, valorK, valorAlfa, tolerancia, limiteDeCiclos, 0);
+    }else if (metodo=="4"){
+         pruebaKFold(trainSet, valorKFold, valorK, valorAlfa, tolerancia, limiteDeCiclos, 1);
+    }else {
         //No se hace nada por ahora
         std::cout << "Los metodos válidos son:" << std::endl;
         std::cout << "\t0 - Identificar imagenes usando KNN" << std::endl;
@@ -398,83 +395,75 @@ double operacionkNNPCA2(std::vector< std::pair<std::vector<double>, int>> trains
     }
 
     //Ahora muestro lo demas
-    double accuracy = ((double)imagenesAcertadas/testSet.size());
+    double accuracy = ((double) imagenesAcertadas/testSet.size());
 
     return accuracy;
 }
 
-void pruebaKFoldkNN(std::string trainset, int KDeFold, int valorK){
+void pruebaKFold(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos, int modo){
     //Pruebo el trainset con KFold
     cargadorDeImagenes baseDeEntrenamiento(trainset.c_str());
 
     std::cout << "TAM CONJUNTO: " << baseDeEntrenamiento.conjuntoDeImagenes().size() << std::endl;
 
     //Parto el conjunto de imagenes en KDeFold partes iguales
+
     Kfold<std::vector<std::pair<std::vector<double>, int>>> kf(KDeFold, baseDeEntrenamiento.conjuntoDeImagenes());
 
     double sumAccu = 0;
 
-    //KFold con kNN solamente
-    for(int particion = 0; particion != KDeFold ; particion++){
-        //Lleno train y test
-        std::vector< std::pair<std::vector<double>, int> > train, test;
-        kf.getFold(particion + 1, back_inserter(train), back_inserter(test));
+    if(modo == 0){
+        //KFold con kNN solamente
+        for(int particion = 0; particion != KDeFold ; particion++){
+            //Lleno train y test
+            std::vector< std::pair<std::vector<double>, int> > train, test;
+            kf.getFold(particion + 1, back_inserter(train), back_inserter(test));
 
-        sumAccu += operacionkNN2(train, test, valorK);
+            sumAccu += operacionkNN2(train, test, valorK);
 
-        //Reinicio train y test para probar de nuevo
-        train.clear();
-        test.clear();
+            //Reinicio train y test para probar de nuevo
+            train.clear();
+            test.clear();
+        }
+
+        sumAccu = sumAccu / KDeFold;
+
+        std::cout << "-------------------------RESULTADOS-------------------------" << std::endl;
+        std::cout << "Metodo elegido: 3 - Test de KFold sobre el conjunto de entrenamiento (SOLO kNN)" << std::endl;
+        std::cout << "Archivo usado para el trainset: " << trainset << std::endl;
+        std::cout << "Valor de KFold: " << KDeFold << std::endl;
+        std::cout << "Valor de k utilizado en kNN: " << valorK << std::endl;
+        std::cout << "MEDIA DE ACCURACY: " << (sumAccu * 100) << "% de imagenes acertadas" << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
+
+
+    }else if(modo == 1){
+        //KFold con kNN y PCA
+        for(int particion = 0; particion != KDeFold ; particion++){
+            //Lleno train y test
+            std::vector< std::pair<std::vector<double>, int> > train, test;
+            kf.getFold(particion + 1, back_inserter(train), back_inserter(test));
+
+            sumAccu += operacionkNNPCA2(train, test, valorAlfa, valorTolerancia, valorK, limiteDeCiclos);
+
+            //Reinicio train y test para probar de nuevo
+            train.clear();
+            test.clear();
+        }
+
+        sumAccu = sumAccu / KDeFold;
+
+        std::cout << "ACCURACY CALCULADO CON KFOLD: " << (sumAccu * 100) << "%" << std::endl;
+
+        std::cout << "-------------------------RESULTADOS-------------------------" << std::endl;
+        std::cout << "Metodo elegido: 4 - Test de KFold sobre el conjunto de entrenamiento (kNN y PCA)" << std::endl;
+        std::cout << "Archivo usado para el trainset: " << trainset << std::endl;
+        std::cout << "Valor de KFold: " << KDeFold << std::endl;
+        std::cout << "Valor de k utilizado en kNN: " << valorK << std::endl;
+        std::cout << "Valor de alfa utilizado en PCA: " << valorAlfa << std::endl;
+        std::cout << "Tolerancia usada para calcular autovalores y autovectores en PCA: " << valorTolerancia << std::endl;
+        std::cout << "MEDIA DE ACCURACY: " << (sumAccu * 100) << "% de imagenes acertadas" << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
     }
 
-    sumAccu = sumAccu / KDeFold;
-
-    std::cout << "-------------------------RESULTADOS-------------------------" << std::endl;
-    std::cout << "Metodo elegido: 3 - Test de KFold sobre el conjunto de entrenamiento (SOLO kNN)" << std::endl;
-    std::cout << "Archivo usado para el trainset: " << trainset << std::endl;
-    std::cout << "Valor de KFold: " << KDeFold << std::endl;
-    std::cout << "Valor de k utilizado en kNN: " << valorK << std::endl;
-    std::cout << "MEDIA DE ACCURACY: " << (sumAccu * 100) << "% de imagenes acertadas" << std::endl;
-    std::cout << "------------------------------------------------------------" << std::endl;
-
-}
-
-void pruebaKFoldkNNPCA(std::string trainset, int KDeFold, int valorK, int valorAlfa, double valorTolerancia, int limiteDeCiclos){
-
-    //Pruebo el trainset con KFold
-    cargadorDeImagenes baseDeEntrenamiento(trainset.c_str());
-
-    std::cout << "TAM CONJUNTO: " << baseDeEntrenamiento.conjuntoDeImagenes().size() << std::endl;
-
-    //Parto el conjunto de imagenes en KDeFold partes iguales
-    Kfold<std::vector<std::pair<std::vector<double>, int>>> kf(KDeFold, baseDeEntrenamiento.conjuntoDeImagenes());
-
-    double sumAccu = 0;
-
-    //KFold con kNN y PCA
-    for(int particion = 0; particion != KDeFold ; particion++){
-        //Lleno train y test
-        std::vector< std::pair<std::vector<double>, int> > train, test;
-        kf.getFold(particion + 1, back_inserter(train), back_inserter(test));
-
-        sumAccu += operacionkNNPCA2(train, test, valorAlfa, valorTolerancia, valorK, limiteDeCiclos);
-
-        //Reinicio train y test para probar de nuevo
-        train.clear();
-        test.clear();
-    }
-
-    sumAccu = sumAccu / KDeFold;
-
-    std::cout << "ACCURACY CALCULADO CON KFOLD: " << (sumAccu * 100) << "%" << std::endl;
-
-    std::cout << "-------------------------RESULTADOS-------------------------" << std::endl;
-    std::cout << "Metodo elegido: 3 - Test de KFold sobre el conjunto de entrenamiento (kNN y PCA)" << std::endl;
-    std::cout << "Archivo usado para el trainset: " << trainset << std::endl;
-    std::cout << "Valor de KFold: " << KDeFold << std::endl;
-    std::cout << "Valor de k utilizado en kNN: " << valorK << std::endl;
-    std::cout << "Valor de alfa utilizado en PCA: " << valorAlfa << std::endl;
-    std::cout << "Tolerancia usada para calcular autovalores y autovectores en PCA: " << valorTolerancia << std::endl;
-    std::cout << "MEDIA DE ACCURACY: " << (sumAccu * 100) << "% de imagenes acertadas" << std::endl;
-    std::cout << "------------------------------------------------------------" << std::endl;
 }

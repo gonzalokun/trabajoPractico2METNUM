@@ -48,7 +48,8 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     std::vector<std::vector<double>> matrizXt(transponerMatriz(matrizX));
 
     //Me guardo la matrizXt ya calculada
-    _matXt = std::vector<std::vector<double>>(matrizXt);
+  _matXt = std::vector<std::vector<double>>(matrizXt);
+//    _matXt= std::vector<std::vector<double>>(matrizX);
 
     //Ahora si cantidadDeColumnas es mas grande tengo que multiplicar al reves asi la matriz M es más chica
     unsigned int cantFilasMatrzM = 0;
@@ -70,8 +71,8 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     //Ahora puedo calcular la matriz M haciendo Xt * X
     //M va a ser de tamaño cantidadDeColumnas * cantidadDeColumnas
 
-    std::cout << "FILAS: " << cantFilasMatrzM << std::endl;
-    std::cout << "COLUMNAS: " << cantColumnasMatrizM << std::endl;
+    //std::cout << "FILAS: " << cantFilasMatrzM << std::endl;
+    //std::cout << "COLUMNAS: " << cantColumnasMatrizM << std::endl;
 
     std::vector<std::vector<double>> matrizM(cantFilasMatrzM, std::vector<double>(cantColumnasMatrizM, 0));
 
@@ -145,7 +146,7 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
 
         //Tengo el autovector, ahora calculo el autovalor
         double autovalor = calcularAutovalor(matrizAux, vectorX);
-
+        //std::cout<<vectorX[0]<<" "<<vectorX[1]<<" "<<vectorX[2]<<" "<<vectorX[3]<<" "<<std::endl;
         //Los guardo
         //Si la M se hizo al revez que que hacer Xt * vectorX
         if(_hizoLaMAlterna){
@@ -158,11 +159,15 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
             }
 
             autoVecYAutoval[i].first = eigenvector;
+            //std::cout<<"vector"<<eigenvector[0]<<" "<<eigenvector[1]<<" "<<eigenvector[2]<<" "<<eigenvector[3]<<" "<<std::endl;
             autoVecYAutoval[i].second = autovalor;
+            //std::cout<<autovalor<<std::endl;
         }
         else{
             autoVecYAutoval[i].first = vectorX;
+              //   std::cout<<"vector"<<vectorX[0]<<" "<<vectorX[1]<<" "<<vectorX[2]<<" "<<vectorX[3]<<" "<<std::endl;
             autoVecYAutoval[i].second = autovalor;
+            //std::cout<<autovalor<<std::endl;
         }
 
         //Uso deflacion para poder buscar los proximos autovec y autoval
@@ -241,11 +246,11 @@ std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<d
 
     std::vector<double> resultado(matriz.size(), 0);
 
-    for(int elem = 0; elem < resultado.size(); elem++){
+    for(int elem = 0; elem < matriz.size(); elem++){
 
         double sum = 0;
 
-        for(int k = 0; k < resultado.size(); k++){
+        for(int k = 0; k < matriz[0].size(); k++){
             sum += matriz[elem][k] * vec[k];
         }
 

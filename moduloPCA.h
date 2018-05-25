@@ -1,7 +1,3 @@
-//
-// Created by Gonzalo on 16/05/2018.
-//
-
 #ifndef TRABAJOPRACTICO2METNUM_MODULOPCA_H
 #define TRABAJOPRACTICO2METNUM_MODULOPCA_H
 
@@ -41,7 +37,7 @@ private:
     //Indica si se hizo
     bool _hizoLaMAlterna;
 
-    //Guardo la matriz Xt por si la multiplicaciÃ³n fue al revÃ©s
+    //Guardo la matriz Xt por si la multiplicación fue al revés
     std::vector< std::vector<double >> _matXt;
 
     //std::vector< std::vector<double >> _matM;
