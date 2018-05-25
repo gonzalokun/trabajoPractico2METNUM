@@ -59,6 +59,7 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
         _hizoLaMAlterna = true;
         cantFilasMatrzM = cantidadDeVectores;
         cantColumnasMatrizM = cantidadDeVectores;
+
     }else{
         //Hay que hacerla normal
         _hizoLaMAlterna = false;
@@ -68,21 +69,16 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
 
     //Ahora puedo calcular la matriz M haciendo Xt * X
     //M va a ser de tamaño cantidadDeColumnas * cantidadDeColumnas
-    std::vector<std::vector<double>> matrizM(cantFilasMatrzM, std::vector<double>(cantColumnasMatrizM, 0));
 
-    //Multiplico Xt * X
-//    for(int fila = 0; fila < cantidadDeColumnas; fila++){
-//        for(int columna = 0; columna < cantidadDeColumnas; columna++){
-//            for(int k = 0; k < cantidadDeVectores; k++){
-//                matrizM[fila][columna] += matrizXt[fila][k] * matrizX[k][columna];
-//            }
-//        }
-//    }
+    std::cout << "FILAS: " << cantFilasMatrzM << std::endl;
+    std::cout << "COLUMNAS: " << cantColumnasMatrizM << std::endl;
+
+    std::vector<std::vector<double>> matrizM(cantFilasMatrzM, std::vector<double>(cantColumnasMatrizM, 0));
 
     //Multiplico Xt * X o X * Xt
     for(int fila = 0; fila < cantFilasMatrzM; fila++){
         for(int columna = 0; columna < cantColumnasMatrizM; columna++){
-            for(int k = 0; k < cantidadDeVectores; k++){
+            for(int k = 0; k < ((_hizoLaMAlterna)? cantidadDeColumnas : cantidadDeVectores); k++){
                 //
                 if(_hizoLaMAlterna){
                     matrizM[fila][columna] += matrizX[fila][k] * matrizXt[k][columna];
@@ -93,8 +89,6 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
             }
         }
     }
-
-    std::cout << "HOLA" << std::endl;
 
     //Ya esta formada la matriz M
     return matrizM;
@@ -132,7 +126,7 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
 
             double normaVector = 1 / (calcularNorma(vectorX));
 
-            for(int j = 0; j < vectorX.size() ; j++){
+            for(int j = 0; j < vectorX.size(); j++){
                 vectorX[j] = vectorX[j] * normaVector;
             }
 
@@ -149,17 +143,27 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
             ciclosRealizados++;
         }
 
-        //Si la M se hizo al revez que que hacer Xt * vectorX
-        if(_hizoLaMAlterna){
-            //
-        }
-
         //Tengo el autovector, ahora calculo el autovalor
-        double autovalor = calcularAutovalor(matrizM, vectorX);
+        double autovalor = calcularAutovalor(matrizAux, vectorX);
 
         //Los guardo
-        autoVecYAutoval[i].first = vectorX;
-        autoVecYAutoval[i].second = autovalor;
+        //Si la M se hizo al revez que que hacer Xt * vectorX
+        if(_hizoLaMAlterna){
+            std::vector<double> eigenvector = multiplicarMatrizVector(_matXt, vectorX);
+
+            double normaVector = 1 / (calcularNorma(eigenvector));
+
+            for(int j = 0; j < eigenvector.size(); j++){
+                eigenvector[j] = eigenvector[j] * normaVector;
+            }
+
+            autoVecYAutoval[i].first = eigenvector;
+            autoVecYAutoval[i].second = autovalor;
+        }
+        else{
+            autoVecYAutoval[i].first = vectorX;
+            autoVecYAutoval[i].second = autovalor;
+        }
 
         //Uso deflacion para poder buscar los proximos autovec y autoval
         //A tengo que hacer matrizAux = matrizAux - autovalor * autovector * autovector^t
@@ -226,14 +230,16 @@ std::vector<std::vector<double>> PCA::transponerMatriz(const std::vector<std::ve
     return matrizT;
 }
 
-//Hace la multiplicacion A*x donde A es matriz y x vector, el resultado es normalizado
+//Hace la multiplicacion A*x donde A es matriz y x vector
 std::vector<double> PCA::multiplicarMatrizVector(const std::vector<std::vector<double>> &matriz, const std::vector<double> &vec) const{
     if(matriz[0].size() != vec.size()){
         throw std::runtime_error("EL TAMAÑO DE LA MATRIZ Y EL VECTOR NO COINCIDEN");
     }
 
     //Se puede multiplicar
-    std::vector<double> resultado(vec.size(), 0);
+    //std::vector<double> resultado(vec.size(), 0);
+
+    std::vector<double> resultado(matriz.size(), 0);
 
     for(int elem = 0; elem < resultado.size(); elem++){
 

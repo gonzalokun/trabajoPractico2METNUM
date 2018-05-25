@@ -44,6 +44,7 @@ private:
     //Guardo la matriz Xt por si la multiplicación fue al revés
     std::vector< std::vector<double >> _matXt;
 
+    //std::vector< std::vector<double >> _matM;
 };
 
 #endif //TRABAJOPRACTICO2METNUM_MODULOPCA_H
