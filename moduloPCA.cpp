@@ -4,6 +4,10 @@
 #include <iostream>
 #include "moduloPCA.h"
 
+PCA::PCA() : _hizoLaMAlterna(false) {
+    //
+}
+
 std::vector<double> PCA::obtenerMedia(const std::vector<std::pair<std::vector<double>, int>> &conjuntoDeImagenes) const{
     int cantidadDeVectores = conjuntoDeImagenes.size();
     std::vector<double> promedioVectores(conjuntoDeImagenes[0].first.size(), 0);
@@ -43,18 +47,54 @@ std::vector<std::vector<double>> PCA::obtenerMatrizM(
     //Si matrizX es cantidadDeVectores * cantidadDeColumnas -> matrizXt es cantidadDeColumnas * cantidadDeVectores
     std::vector<std::vector<double>> matrizXt(transponerMatriz(matrizX));
 
+    //Me guardo la matrizXt ya calculada
+    _matXt = std::vector<std::vector<double>>(matrizXt);
+
+    //Ahora si cantidadDeColumnas es mas grande tengo que multiplicar al reves asi la matriz M es más chica
+    unsigned int cantFilasMatrzM = 0;
+    unsigned int cantColumnasMatrizM = 0;
+
+    if(cantidadDeColumnas > cantidadDeVectores){
+        //Hay que hacerlo al revez
+        _hizoLaMAlterna = true;
+        cantFilasMatrzM = cantidadDeVectores;
+        cantColumnasMatrizM = cantidadDeVectores;
+    }else{
+        //Hay que hacerla normal
+        _hizoLaMAlterna = false;
+        cantFilasMatrzM = cantidadDeColumnas;
+        cantColumnasMatrizM = cantidadDeColumnas;
+    }
+
     //Ahora puedo calcular la matriz M haciendo Xt * X
     //M va a ser de tamaño cantidadDeColumnas * cantidadDeColumnas
-    std::vector<std::vector<double>> matrizM(cantidadDeColumnas, std::vector<double>(cantidadDeColumnas, 0));
+    std::vector<std::vector<double>> matrizM(cantFilasMatrzM, std::vector<double>(cantColumnasMatrizM, 0));
 
     //Multiplico Xt * X
-    for(int fila = 0; fila < cantidadDeColumnas; fila++){
-        for(int columna = 0; columna < cantidadDeColumnas; columna++){
+//    for(int fila = 0; fila < cantidadDeColumnas; fila++){
+//        for(int columna = 0; columna < cantidadDeColumnas; columna++){
+//            for(int k = 0; k < cantidadDeVectores; k++){
+//                matrizM[fila][columna] += matrizXt[fila][k] * matrizX[k][columna];
+//            }
+//        }
+//    }
+
+    //Multiplico Xt * X o X * Xt
+    for(int fila = 0; fila < cantFilasMatrzM; fila++){
+        for(int columna = 0; columna < cantColumnasMatrizM; columna++){
             for(int k = 0; k < cantidadDeVectores; k++){
-                matrizM[fila][columna] += matrizXt[fila][k] * matrizX[k][columna];
+                //
+                if(_hizoLaMAlterna){
+                    matrizM[fila][columna] += matrizX[fila][k] * matrizXt[k][columna];
+                }
+                else{
+                    matrizM[fila][columna] += matrizXt[fila][k] * matrizX[k][columna];
+                }
             }
         }
     }
+
+    std::cout << "HOLA" << std::endl;
 
     //Ya esta formada la matriz M
     return matrizM;
@@ -107,6 +147,11 @@ std::vector<std::pair<std::vector<double>, double >> PCA::calcularAutovalYAutoVe
             vectorAnterior = vectorX;
 
             ciclosRealizados++;
+        }
+
+        //Si la M se hizo al revez que que hacer Xt * vectorX
+        if(_hizoLaMAlterna){
+            //
         }
 
         //Tengo el autovector, ahora calculo el autovalor

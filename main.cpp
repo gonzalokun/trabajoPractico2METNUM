@@ -82,9 +82,6 @@ int main(int cantidadDeArgumentos, char** argumentos) {
     //K del Kfold
     int valorKFold = 41;
 
-    //Modos para probar KFold (0 = KFold usando solo kNN, 1 = KFold usando kNN y PCA)
-    //int modo = 1;
-
     //Ahora opero según lo ingresado
     if(metodo == "0"){
         //Solo se hace kNN

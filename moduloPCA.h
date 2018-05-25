@@ -10,7 +10,7 @@
 class PCA{
 public:
     //template <class T>
-    //PCA(std::vector<std::pair<std::vector<double>, int>> conjuntoDeImagenes);
+    PCA();
 
     //Devuelve el vector mu con la media de los vectores del conjunto
     std::vector<double> obtenerMedia(const std::vector<std::pair<std::vector<double>, int>> &conjuntoDeImagenes) const;
@@ -37,6 +37,12 @@ private:
 
     //Calcula los autovalores de una matriz con el metodo de la potencia
     double calcularAutovalor(const std::vector<std::vector<double>> &matrizM, const std::vector<double> &autovector) const;
+
+    //Indica si se hizo
+    bool _hizoLaMAlterna;
+
+    //Guardo la matriz Xt por si la multiplicación fue al revés
+    std::vector< std::vector<double >> _matXt;
 
 };
 
