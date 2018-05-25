@@ -34,6 +34,7 @@ Kfold<In>::Kfold(int _folds, In _vecto) :
 
     int foldNo = 0;
     int cont = 0;
+    random_shuffle ( vecto.begin(), vecto.end() );
     for (auto i = vecto.begin(); i != vecto.end(); i++) {
         //if (end-i>=0)cout << "CICLO i: " << end-i << endl;
 
